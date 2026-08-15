@@ -88,6 +88,7 @@ dd { min-width: 0; margin: 0; }
   .mobile-table .empty-cell { display: block; }
   .mobile-table .empty-cell::before { content: none; }
   .table-scroll { max-width: 100%; overflow: visible; }
+  .table-scroll .mobile-table { min-width: 0; }
   .activity-table { min-width: 0; }
   .mobile-table .target { min-width: 0; }
   .mobile-table .nowrap { width: auto; white-space: normal; }
