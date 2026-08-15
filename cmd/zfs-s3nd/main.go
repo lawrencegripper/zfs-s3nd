@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/lawrencegripper/zfs-s3nd/internal/appsettings"
 	"github.com/lawrencegripper/zfs-s3nd/internal/catalog"
 	"github.com/lawrencegripper/zfs-s3nd/internal/catalog/db"
 	"github.com/lawrencegripper/zfs-s3nd/internal/catalogbackup"
@@ -113,6 +114,13 @@ func serve(logger *slog.Logger, cfg config.Config, cat *catalog.Catalog) error {
 	}
 	keyBuilder := storage.KeyBuilder{RootPrefix: cfg.StorageRootPrefix}
 	repo := catalog.NewRepository(cat.DB())
+	settingsManager, err := appsettings.New(ctx, cat.DB(), appsettings.Overrides{
+		UploadThroughputLimitMbps: cfg.UploadThroughputLimitMbpsEnvOverride,
+		MaxIncrementalChainDepth:  cfg.MaxIncrementalChainDepthEnvOverride,
+	})
+	if err != nil {
+		return fmt.Errorf("load application settings: %w", err)
+	}
 	if cfg.ReconcileStaleAfter > 0 {
 		cutoff := time.Now().Add(-cfg.ReconcileStaleAfter)
 		result, err := repo.ReconcileStaleUploads(ctx, cutoff, 100)
@@ -146,7 +154,16 @@ func serve(logger *slog.Logger, cfg config.Config, cat *catalog.Catalog) error {
 		startCatalogBackupScheduler(ctx, logger, cat, repo, store, keyBuilder, cfg.CatalogBackupInterval)
 	}
 	deletion.StartWorker(ctx, logger, deletion.Worker{DB: cat.DB(), Store: store, Logger: logger, Limit: 10}, cfg.CleanupWorkerInterval)
-	ingestSvc := ingest.Service{Repo: repo, Store: store, Keys: keyBuilder, ChunkSize: config.DefaultChunkSize, MaxIncrementalChainDepth: cfg.MaxIncrementalChainDepth}
+	ingestSvc := ingest.Service{
+		Repo:                     repo,
+		Store:                    store,
+		Keys:                     keyBuilder,
+		ChunkSize:                config.DefaultChunkSize,
+		MaxIncrementalChainDepth: cfg.MaxIncrementalChainDepth,
+		MaxIncrementalChainDepthFunc: func() int64 {
+			return settingsManager.Current().MaxIncrementalChainDepthValue
+		},
+	}
 
 	addr := ":" + cfg.HTTPPort
 	validationRunner := validation.Runner{DB: cat.DB(), Store: store, Checker: validation.ZstreamdumpChecker{}, Executor: "local"}
@@ -155,12 +172,15 @@ func serve(logger *slog.Logger, cfg config.Config, cat *catalog.Catalog) error {
 	server.SetRestoreSSHCommandPrefix(cfg.RestoreSSHCommandPrefix)
 	server.SetStore(store)
 	server.SetValidationRunner(validationRunner)
+	server.SetSettingsManager(settingsManager)
 
 	hostKey, err := sshserver.LoadOrCreateHostKey(cfg.SSHHostKeyPath)
 	if err != nil {
 		return err
 	}
-	sshSrv := &sshserver.Server{Addr: ":" + cfg.SSHPort, Signer: hostKey, DB: cat.DB(), Ingest: ingestSvc, Logger: logger, UploadRateBytesPerSecond: cfg.UploadThroughputLimitBytesPerSecond, PostUploadValidation: func(snapshotID string) {
+	sshSrv := &sshserver.Server{Addr: ":" + cfg.SSHPort, Signer: hostKey, DB: cat.DB(), Ingest: ingestSvc, Logger: logger, UploadRateBytesPerSecond: cfg.UploadThroughputLimitBytesPerSecond, UploadRateBytesPerSecondFunc: func() int64 {
+		return settingsManager.Current().UploadThroughputLimitBytesPerSecond
+	}, PostUploadValidation: func(snapshotID string) {
 		go func() {
 			if err := validationRunner.RunSnapshot(context.Background(), snapshotID); err != nil {
 				logger.Warn("post-upload validation failed", "snapshot_id", snapshotID, "error", err)
