@@ -49,13 +49,13 @@
 
     <section>
       <h2>Current activity</h2>
-      <table>
+      <table class="mobile-table">
         <thead><tr><th>Target</th><th>Status</th><th>Received</th><th>Chunks</th><th>Throughput</th><th>Last heartbeat</th></tr></thead>
         <tbody>
           {{range .ActiveUploads}}
-            <tr><td>{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.TargetSnapshotName}}</td><td><span class="badge {{badge .Status}}">{{.Status}}</span></td><td>{{bytes .BytesReceived}}</td><td>{{.ChunksCompleted}}</td><td>{{.Throughput}}</td><td>{{.LastHeartbeatAt}}</td></tr>
+            <tr><td data-label="Target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.TargetSnapshotName}}</td><td data-label="Status"><span class="badge {{badge .Status}}">{{.Status}}</span></td><td data-label="Received">{{bytes .BytesReceived}}</td><td data-label="Chunks">{{.ChunksCompleted}}</td><td data-label="Throughput">{{.Throughput}}</td><td data-label="Last heartbeat">{{.LastHeartbeatAt}}</td></tr>
           {{else}}
-            <tr><td colspan="6">No active uploads.</td></tr>
+            <tr><td class="empty-cell" colspan="6">No active uploads.</td></tr>
           {{end}}
         </tbody>
       </table>
@@ -69,13 +69,13 @@
         <div class="card"><strong>Committed snapshots</strong><br>{{.SnapshotCount}}</div>
         <div class="card"><strong>Stored bytes</strong><br>{{bytes .StoredBytes}}</div>
       </div>
-      <table>
+      <table class="mobile-table">
         <thead><tr><th>Device</th><th>Pool</th><th>Dataset</th><th>Snapshots</th><th>Latest</th><th>Latest valid</th><th>Stored</th></tr></thead>
         <tbody>
           {{range .Datasets}}
-            <tr><td>{{.SourceName}}</td><td>{{.PoolName}}</td><td><a href="/datasets/{{.DatasetID}}">{{.DatasetPath}}</a></td><td>{{.SnapshotCount}}</td><td>{{.LatestSnapshotName}}</td><td>{{.LatestChainValidSnapshotName}}</td><td>{{bytesAny .StoredBytes}}</td></tr>
+            <tr><td data-label="Device">{{.SourceName}}</td><td data-label="Pool">{{.PoolName}}</td><td data-label="Dataset"><a href="/datasets/{{.DatasetID}}">{{.DatasetPath}}</a></td><td data-label="Snapshots">{{.SnapshotCount}}</td><td data-label="Latest">{{.LatestSnapshotName}}</td><td data-label="Latest valid">{{.LatestChainValidSnapshotName}}</td><td data-label="Stored">{{bytesAny .StoredBytes}}</td></tr>
           {{else}}
-            <tr><td colspan="7">No datasets yet.</td></tr>
+            <tr><td class="empty-cell" colspan="7">No datasets yet.</td></tr>
           {{end}}
         </tbody>
       </table>

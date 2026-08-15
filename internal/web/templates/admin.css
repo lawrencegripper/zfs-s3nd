@@ -30,7 +30,7 @@ a { color: #1d4ed8; }
 .row-actions form { margin: 0; }
 .row-actions .button-link, .row-actions button { width: 100%; min-height: 2.25rem; box-sizing: border-box; text-align: center; }
 .empty-state { text-align: center; padding: 2rem; }
-.card, section { background: white; border: 1px solid #e5e7eb; border-radius: .75rem; padding: 1rem; margin: 1rem 0; }
+.card, section { min-width: 0; background: white; border: 1px solid #e5e7eb; border-radius: .75rem; padding: 1rem; margin: 1rem 0; }
 .card { margin: 0; }
 .callout { border-color: #bfdbfe; background: #eff6ff; }
 .danger-zone { border-color: #fecaca; background: #fff1f2; }
@@ -46,12 +46,17 @@ section h2 { margin-top: 0; }
 .activity-table .target { min-width: 20rem; }
 .activity-empty { margin-bottom: 0; color: #4b5563; }
 .nowrap { white-space: nowrap; width: 1%; }
+textarea, input, button { font: inherit; }
 textarea, input { width: 100%; box-sizing: border-box; padding: .45rem; }
 input[type="checkbox"] { width: auto; }
 .check-label { display: inline-flex; gap: .5rem; align-items: center; }
 button, .button-link { padding: .45rem .75rem; border-radius: .35rem; border: 1px solid #9ca3af; background: #fff; color: #111827; text-decoration: none; display: inline-block; }
 pre, code { background: #f3f4f6; border-radius: .35rem; }
+h1, h2, h3, code, dd { overflow-wrap: anywhere; }
 pre { padding: 1rem; overflow-x: auto; }
+dl { display: grid; grid-template-columns: minmax(7rem, 10rem) minmax(0, 1fr); gap: .5rem 1rem; }
+dt { font-weight: 700; }
+dd { min-width: 0; margin: 0; }
 .command-block { position: relative; }
 .command-block pre { margin-bottom: 0; padding-right: 6.5rem; }
 .command-block textarea { padding-right: 6.5rem; }
@@ -62,13 +67,30 @@ pre { padding: 1rem; overflow-x: auto; }
 .inline-actions input { min-width: min(12rem, 100%); }
 @media (max-width: 40rem) {
   main { padding: 1rem; }
-  .topbar-inner { padding: .75rem 1rem; gap: .75rem; }
-  .topbar .brand { flex-basis: 100%; }
-  .topbar .logout { margin-left: 0; }
+  .topbar-inner { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: .75rem 1rem; gap: .5rem; }
+  .topbar .brand { grid-column: 1 / 3; grid-row: 1; margin-right: 0; align-self: center; }
+  .topbar .logout { grid-column: 3; grid-row: 1; margin: 0; text-align: right; }
+  .topbar .nav-link { text-align: center; padding: .4rem .2rem; }
+  .topbar .logout button { width: 100%; }
   .two-col { grid-template-columns: 1fr; }
+  input:not([type="hidden"]):not([type="checkbox"]), textarea, button, .button-link { min-height: 2.75rem; }
   .command-block pre { padding-top: 3.25rem; padding-right: 1rem; }
+  dl { grid-template-columns: 1fr; gap: .2rem; }
+  dd { margin-bottom: .65rem; }
   .check-item { grid-template-columns: minmax(0, 1fr) auto; }
   .check-item > :last-child { grid-column: 1 / -1; }
+  .mobile-table, .mobile-table tbody { display: block; width: 100%; min-width: 0; overflow: visible; }
+  .mobile-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .mobile-table tr { display: block; margin-top: 1rem; padding: .5rem .75rem; border: 1px solid #e5e7eb; border-radius: .5rem; }
+  .mobile-table td { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: .75rem; padding: .55rem 0; border-bottom: 1px solid #e5e7eb; overflow-wrap: anywhere; }
+  .mobile-table td:last-child { border-bottom: 0; }
+  .mobile-table td::before { content: attr(data-label); color: #6b7280; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  .mobile-table .empty-cell { display: block; }
+  .mobile-table .empty-cell::before { content: none; }
+  .table-scroll { max-width: 100%; overflow: visible; }
+  .activity-table { min-width: 0; }
+  .mobile-table .target { min-width: 0; }
+  .mobile-table .nowrap { width: auto; white-space: normal; }
 }
 @media (max-width: 64rem) {
   .dataset-table, .dataset-table tbody { display: block; width: 100%; }

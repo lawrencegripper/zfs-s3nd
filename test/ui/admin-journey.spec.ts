@@ -114,9 +114,25 @@ test.describe.serial("single-admin journey", () => {
 
     const settingsHeadings = await page.locator("main > section > h2").allTextContents();
     expect(settingsHeadings.at(-1)).toBe("Backup policy");
+    const controlMetrics = await page.locator("input:not([type=hidden]), textarea, button").evaluateAll((controls) => controls.filter((control) => {
+      const style = getComputedStyle(control);
+      return style.display !== "none" && style.visibility !== "hidden";
+    }).map((control) => ({
+      type: control.getAttribute("type"),
+      fontSize: Number.parseFloat(getComputedStyle(control).fontSize),
+      height: control.getBoundingClientRect().height,
+    })));
+    for (const control of controlMetrics) {
+      expect(control.fontSize).toBeGreaterThanOrEqual(16);
+      if (control.type !== "checkbox") expect(control.height).toBeGreaterThanOrEqual(44);
+    }
+
     await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Datasets", exact: true }).click();
     await page.getByRole("link", { name: "View" }).first().click();
-    const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
+    let dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
     expect(dimensions.scrollWidth, "Dataset details should not scroll horizontally").toBeLessThanOrEqual(dimensions.width);
+    await page.getByRole("link", { name: "daily-001" }).click();
+    dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
+    expect(dimensions.scrollWidth, "Snapshot details should not scroll horizontally").toBeLessThanOrEqual(dimensions.width);
   });
 });

@@ -35,13 +35,13 @@
   </section>
   <section>
     <h2>Snapshots</h2>
-    <table>
+    <table class="mobile-table">
       <thead><tr><th>Name</th><th>Status</th><th>Stream validation</th><th>Chain validation</th><th>Stored</th><th>Chunks</th><th>Completed</th><th>Failure</th></tr></thead>
       <tbody>
         {{range .Snapshots}}
-          <tr><td><a href="/snapshots/{{.ID}}">{{.Name}}</a></td><td><span class="badge {{badge .Status}}">{{.Status}}</span></td><td><span class="badge {{badge .StreamValidationStatus}}">{{.StreamValidationStatus}}</span></td><td><span class="badge {{badge .ChainValidationStatus}}">{{.ChainValidationStatus}}</span></td><td>{{bytes .StoredBytes}}</td><td>{{.ChunkCount}}</td><td>{{nullString .UploadCompletedAt}}</td><td>{{nullString .FailureReason}}</td></tr>
+          <tr><td data-label="Name"><a href="/snapshots/{{.ID}}">{{.Name}}</a></td><td data-label="Status"><span class="badge {{badge .Status}}">{{.Status}}</span></td><td data-label="Stream validation"><span class="badge {{badge .StreamValidationStatus}}">{{.StreamValidationStatus}}</span></td><td data-label="Chain validation"><span class="badge {{badge .ChainValidationStatus}}">{{.ChainValidationStatus}}</span></td><td data-label="Stored">{{bytes .StoredBytes}}</td><td data-label="Chunks">{{.ChunkCount}}</td><td data-label="Completed">{{nullString .UploadCompletedAt}}</td><td data-label="Failure">{{nullString .FailureReason}}</td></tr>
         {{else}}
-          <tr><td colspan="8">No snapshots yet.</td></tr>
+          <tr><td class="empty-cell" colspan="8">No snapshots yet.</td></tr>
         {{end}}
       </tbody>
     </table>

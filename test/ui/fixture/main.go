@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/lawrencegripper/zfs-s3nd/internal/appsettings"
 	"github.com/lawrencegripper/zfs-s3nd/internal/catalog"
 	"github.com/lawrencegripper/zfs-s3nd/internal/ingest"
 	"github.com/lawrencegripper/zfs-s3nd/internal/storage"
@@ -34,6 +35,11 @@ func main() {
 	store := storage.NewMemoryStore()
 	server := web.New("127.0.0.1:3100", cat, slog.Default())
 	server.SetStore(store)
+	settingsManager, err := appsettings.New(context.Background(), cat.DB(), appsettings.Overrides{})
+	if err != nil {
+		panic(err)
+	}
+	server.SetSettingsManager(settingsManager)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /__fixture/seed-dataset", func(w http.ResponseWriter, r *http.Request) {

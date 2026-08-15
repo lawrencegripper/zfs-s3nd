@@ -30,12 +30,12 @@
       <p><label>Public key<br><textarea name="public_key" rows="3" required placeholder="ssh-ed25519 AAAA..."></textarea></label></p>
       <button type="submit">Add public key</button>
     </form>
-    <table>
+    <table class="mobile-table">
       <thead><tr><th>Name</th><th>Fingerprint</th><th>Last used</th><th>Action</th></tr></thead>
       <tbody>
         {{range .SSHKeys}}
-          <tr><td>{{.Name}}</td><td><code>{{.FingerprintSha256}}</code></td><td>{{nullString .LastUsedAt}}</td><td><form method="post" action="/settings/ssh-keys/{{.ID}}/delete" onsubmit="return confirm('Delete this SSH key?')"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Delete</button></form></td></tr>
-        {{else}}<tr><td colspan="4">No SSH keys configured.</td></tr>{{end}}
+          <tr><td data-label="Name">{{.Name}}</td><td data-label="Fingerprint"><code>{{.FingerprintSha256}}</code></td><td data-label="Last used">{{nullString .LastUsedAt}}</td><td data-label="Action"><form method="post" action="/settings/ssh-keys/{{.ID}}/delete" onsubmit="return confirm('Delete this SSH key?')"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Delete</button></form></td></tr>
+        {{else}}<tr><td class="empty-cell" colspan="4">No SSH keys configured.</td></tr>{{end}}
       </tbody>
     </table>
   </section>
@@ -47,12 +47,12 @@
       <p><label>Name<br><input name="name" required></label></p>
       <button type="submit">Create API token</button>
     </form>
-    <table>
+    <table class="mobile-table">
       <thead><tr><th>Name</th><th>Prefix</th><th>Created</th><th>Last used</th><th>Revoked</th><th>Action</th></tr></thead>
       <tbody>
         {{range .APITokens}}
-          <tr><td>{{.Name}}</td><td><code>{{.TokenPrefix}}</code></td><td>{{.CreatedAt}}</td><td>{{nullString .LastUsedAt}}</td><td>{{nullString .RevokedAt}}</td><td>{{if not .RevokedAt.Valid}}<form method="post" action="/settings/api-tokens/{{.ID}}/delete" onsubmit="return confirm('Revoke this API token?')"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Revoke</button></form>{{end}}</td></tr>
-        {{else}}<tr><td colspan="6">No API tokens configured.</td></tr>{{end}}
+          <tr><td data-label="Name">{{.Name}}</td><td data-label="Prefix"><code>{{.TokenPrefix}}</code></td><td data-label="Created">{{.CreatedAt}}</td><td data-label="Last used">{{nullString .LastUsedAt}}</td><td data-label="Revoked">{{nullString .RevokedAt}}</td><td data-label="Action">{{if not .RevokedAt.Valid}}<form method="post" action="/settings/api-tokens/{{.ID}}/delete" onsubmit="return confirm('Revoke this API token?')"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Revoke</button></form>{{end}}</td></tr>
+        {{else}}<tr><td class="empty-cell" colspan="6">No API tokens configured.</td></tr>{{end}}
       </tbody>
     </table>
   </section>

@@ -5,7 +5,9 @@ export default defineConfig({
   testMatch: "**/*.spec.ts",
   fullyParallel: false,
   workers: 1,
-  retries: process.env.CI ? 2 : 0,
+  // The journey intentionally shares server state across serial tests, so an
+  // individual retry would inherit a partially completed setup.
+  retries: 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: "http://127.0.0.1:3100",

@@ -11,11 +11,11 @@
     <h2>Active uploads</h2>
     {{if .ActiveUploads}}
       <div class="table-scroll">
-        <table class="activity-table">
+        <table class="activity-table mobile-table">
           <thead><tr><th class="target">Target</th><th class="nowrap">Status</th><th class="nowrap">Received</th><th class="nowrap">Chunks</th><th class="nowrap">Throughput</th><th class="nowrap">Started</th><th class="nowrap">Last heartbeat</th></tr></thead>
           <tbody>
             {{range .ActiveUploads}}
-              <tr><td class="wrap target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.TargetSnapshotName}}</td><td class="nowrap"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap">{{bytes .BytesReceived}}</td><td class="nowrap">{{.ChunksCompleted}}</td><td class="nowrap">{{.Throughput}}</td><td class="nowrap">{{time .StartedAt}}</td><td class="nowrap">{{time .LastHeartbeatAt}}</td></tr>
+              <tr><td class="wrap target" data-label="Target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.TargetSnapshotName}}</td><td class="nowrap" data-label="Status"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap" data-label="Received">{{bytes .BytesReceived}}</td><td class="nowrap" data-label="Chunks">{{.ChunksCompleted}}</td><td class="nowrap" data-label="Throughput">{{.Throughput}}</td><td class="nowrap" data-label="Started">{{time .StartedAt}}</td><td class="nowrap" data-label="Last heartbeat">{{time .LastHeartbeatAt}}</td></tr>
             {{end}}
           </tbody>
         </table>
@@ -28,12 +28,12 @@
   <section>
     <h2>Validation jobs</h2>
     <div class="table-scroll">
-      <table class="activity-table">
+      <table class="activity-table mobile-table">
         <thead><tr><th class="nowrap">Status</th><th class="nowrap">Type</th><th class="target">Target</th><th class="nowrap">Executor</th><th class="nowrap">Started</th><th class="nowrap">Completed</th><th class="wrap">Result</th></tr></thead>
         <tbody>
           {{range .ValidationJobs}}
-            <tr><td class="nowrap"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap">{{label .Type}}</td><td class="wrap target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.SnapshotName}}</td><td class="nowrap">{{.Executor}}</td><td class="nowrap">{{time .StartedAt}}</td><td class="nowrap">{{time .CompletedAt}}</td><td class="wrap">{{nullString .ResultSummary}}</td></tr>
-          {{else}}<tr><td colspan="7">No validation jobs yet.</td></tr>{{end}}
+            <tr><td class="nowrap" data-label="Status"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap" data-label="Type">{{label .Type}}</td><td class="wrap target" data-label="Target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.SnapshotName}}</td><td class="nowrap" data-label="Executor">{{.Executor}}</td><td class="nowrap" data-label="Started">{{time .StartedAt}}</td><td class="nowrap" data-label="Completed">{{time .CompletedAt}}</td><td class="wrap" data-label="Result">{{nullString .ResultSummary}}</td></tr>
+          {{else}}<tr><td class="empty-cell" colspan="7">No validation jobs yet.</td></tr>{{end}}
         </tbody>
       </table>
     </div>
@@ -42,12 +42,12 @@
   <section>
     <h2>Operations</h2>
     <div class="table-scroll">
-      <table class="activity-table">
+      <table class="activity-table mobile-table">
         <thead><tr><th class="nowrap">Type</th><th class="nowrap">Status</th><th class="nowrap">Started</th><th class="nowrap">Updated</th><th class="nowrap">Completed</th><th class="wrap">Summary</th><th class="wrap">Failure</th></tr></thead>
         <tbody>
           {{range .Operations}}
-            <tr><td class="nowrap">{{label .Type}}</td><td class="nowrap"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap">{{time .StartedAt}}</td><td class="nowrap">{{time .UpdatedAt}}</td><td class="nowrap">{{time .CompletedAt}}</td><td class="wrap">{{nullString .Summary}}</td><td class="wrap">{{nullString .FailureReason}}</td></tr>
-          {{else}}<tr><td colspan="7">No operations yet.</td></tr>{{end}}
+            <tr><td class="nowrap" data-label="Type">{{label .Type}}</td><td class="nowrap" data-label="Status"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap" data-label="Started">{{time .StartedAt}}</td><td class="nowrap" data-label="Updated">{{time .UpdatedAt}}</td><td class="nowrap" data-label="Completed">{{time .CompletedAt}}</td><td class="wrap" data-label="Summary">{{nullString .Summary}}</td><td class="wrap" data-label="Failure">{{nullString .FailureReason}}</td></tr>
+          {{else}}<tr><td class="empty-cell" colspan="7">No operations yet.</td></tr>{{end}}
         </tbody>
       </table>
     </div>
