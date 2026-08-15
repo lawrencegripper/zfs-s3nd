@@ -8,46 +8,6 @@
   {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
   {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
 
-  {{if .HasRuntimeSettings}}
-  <section>
-    <h2>Backup policy</h2>
-    <p>Environment variables override values saved here. Database changes apply to new uploads immediately.</p>
-    <div class="cards two-col">
-      {{$upload := .RuntimeSettings.UploadThroughputLimit}}
-      <div class="card">
-        <h3>Upload throughput limit <span class="badge badge-yellow">{{$upload.Source}}</span></h3>
-        <p>Effective value: <strong>{{$upload.Value}} Mbps</strong>. Use <code>0</code> to disable throttling.</p>
-        {{if $upload.EnvironmentControlled}}
-          <p class="subtle">Controlled by <code>{{$upload.EnvironmentVariable}}</code>. Remove that environment variable to edit this setting here.</p>
-        {{end}}
-        <form method="post" action="/settings/runtime/{{$upload.Key}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-          <p><label>Limit in decimal Mbps<br><input type="number" name="value" min="0" step="0.1" value="{{$upload.Value}}" required {{if $upload.EnvironmentControlled}}disabled{{end}}></label></p>
-          <button type="submit" {{if $upload.EnvironmentControlled}}disabled{{end}}>Save limit</button>
-        </form>
-        {{if eq $upload.Source "Database"}}
-        <form class="inline-actions" method="post" action="/settings/runtime/{{$upload.Key}}/reset"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Reset to default ({{$upload.DefaultValue}} Mbps)</button></form>
-        {{end}}
-      </div>
-
-      {{$chain := .RuntimeSettings.MaxIncrementalChainDepth}}
-      <div class="card">
-        <h3>Maximum incremental chain depth <span class="badge badge-yellow">{{$chain.Source}}</span></h3>
-        <p>Effective value: <strong>{{$chain.Value}}</strong>. Use <code>0</code> for no limit.</p>
-        {{if $chain.EnvironmentControlled}}
-          <p class="subtle">Controlled by <code>{{$chain.EnvironmentVariable}}</code>. Remove that environment variable to edit this setting here.</p>
-        {{end}}
-        <form method="post" action="/settings/runtime/{{$chain.Key}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-          <p><label>Snapshots in a chain<br><input type="number" name="value" min="0" step="1" value="{{$chain.Value}}" required {{if $chain.EnvironmentControlled}}disabled{{end}}></label></p>
-          <button type="submit" {{if $chain.EnvironmentControlled}}disabled{{end}}>Save depth</button>
-        </form>
-        {{if eq $chain.Source "Database"}}
-        <form class="inline-actions" method="post" action="/settings/runtime/{{$chain.Key}}/reset"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Reset to default ({{$chain.DefaultValue}})</button></form>
-        {{end}}
-      </div>
-    </div>
-  </section>
-  {{end}}
-
   <section>
     <h2>SSH public keys</h2>
     <p><strong>Public keys only.</strong> Keep private keys on their source systems. The SSH username becomes the source name in the catalog; use a stable name such as <code>nas-home</code>.</p>
@@ -96,5 +56,47 @@
       </tbody>
     </table>
   </section>
+
+  {{if .HasRuntimeSettings}}
+  <section>
+    <h2>Backup policy</h2>
+    <p>Environment variables override values saved here. Database changes apply to new uploads immediately.</p>
+    <div class="cards two-col">
+      {{$upload := .RuntimeSettings.UploadThroughputLimit}}
+      <div class="card">
+        <h3>Upload throughput limit <span class="badge badge-yellow">{{$upload.Source}}</span></h3>
+        <p class="subtle">Caps each upload so backups do not saturate the source connection.</p>
+        <p>Effective value: <strong>{{$upload.Value}} Mbps</strong>. Use <code>0</code> to disable throttling.</p>
+        {{if $upload.EnvironmentControlled}}
+          <p class="subtle">Controlled by <code>{{$upload.EnvironmentVariable}}</code>. Remove that environment variable to edit this setting here.</p>
+        {{end}}
+        <form method="post" action="/settings/runtime/{{$upload.Key}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <p><label>Limit in decimal Mbps<br><input type="number" name="value" min="0" step="0.1" value="{{$upload.Value}}" required {{if $upload.EnvironmentControlled}}disabled{{end}}></label></p>
+          <button type="submit" {{if $upload.EnvironmentControlled}}disabled{{end}}>Save limit</button>
+        </form>
+        {{if eq $upload.Source "Database"}}
+        <form class="inline-actions" method="post" action="/settings/runtime/{{$upload.Key}}/reset"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Reset to default ({{$upload.DefaultValue}} Mbps)</button></form>
+        {{end}}
+      </div>
+
+      {{$chain := .RuntimeSettings.MaxIncrementalChainDepth}}
+      <div class="card">
+        <h3>Maximum incremental chain depth <span class="badge badge-yellow">{{$chain.Source}}</span></h3>
+        <p class="subtle">Requires periodic full snapshots so restore chains do not grow indefinitely.</p>
+        <p>Effective value: <strong>{{$chain.Value}}</strong>. Use <code>0</code> for no limit.</p>
+        {{if $chain.EnvironmentControlled}}
+          <p class="subtle">Controlled by <code>{{$chain.EnvironmentVariable}}</code>. Remove that environment variable to edit this setting here.</p>
+        {{end}}
+        <form method="post" action="/settings/runtime/{{$chain.Key}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <p><label>Snapshots in a chain<br><input type="number" name="value" min="0" step="1" value="{{$chain.Value}}" required {{if $chain.EnvironmentControlled}}disabled{{end}}></label></p>
+          <button type="submit" {{if $chain.EnvironmentControlled}}disabled{{end}}>Save depth</button>
+        </form>
+        {{if eq $chain.Source "Database"}}
+        <form class="inline-actions" method="post" action="/settings/runtime/{{$chain.Key}}/reset"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Reset to default ({{$chain.DefaultValue}})</button></form>
+        {{end}}
+      </div>
+    </div>
+  </section>
+  {{end}}
 </main>
 </body></html>

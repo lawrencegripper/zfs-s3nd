@@ -102,12 +102,21 @@ test.describe.serial("single-admin journey", () => {
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("restore-stream");
   });
 
-  test("keeps the setup and dashboard usable at a narrow viewport", async ({ page }) => {
+  test("keeps administration pages usable at a narrow viewport", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await signIn(page);
-    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Datasets" }).click();
+
+    for (const destination of ["Dashboard", "Datasets", "Activity", "Status", "Settings"]) {
+      await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: destination, exact: true }).click();
+      const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
+      expect(dimensions.scrollWidth, `${destination} should not scroll horizontally`).toBeLessThanOrEqual(dimensions.width);
+    }
+
+    const settingsHeadings = await page.locator("main > section > h2").allTextContents();
+    expect(settingsHeadings.at(-1)).toBe("Backup policy");
+    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Datasets", exact: true }).click();
+    await page.getByRole("link", { name: "View" }).first().click();
     const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
-    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.width);
-    await expect(page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Settings" })).toBeVisible();
+    expect(dimensions.scrollWidth, "Dataset details should not scroll horizontally").toBeLessThanOrEqual(dimensions.width);
   });
 });
