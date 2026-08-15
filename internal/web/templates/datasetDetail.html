@@ -1,0 +1,55 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Dataset - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+{{nav .CSRFToken}}
+<main>
+  <p><a href="/datasets">Datasets</a></p>
+  <h1>{{.Dataset.SourceName}} / {{.Dataset.PoolName}} / {{.Dataset.DatasetPath}}</h1>
+  {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+  <section class="headline-status" aria-labelledby="restore-latest-title">
+    <h2 id="restore-latest-title">Restore latest chain-valid snapshot</h2>
+    {{if .RestoreCommands}}
+      <p>Restore point: <strong>{{.RestoreSnapshot}}</strong></p>
+      {{if gt (len .RestoreCommands) 1}}
+        <p>Run these commands in order: parent snapshot first, then each incremental.</p>
+        <ol class="restore-steps">
+          {{range $i, $command := .RestoreCommands}}
+            <li><p>Step {{add $i 1}}</p><div class="command-block"><pre id="dataset-restore-{{$i}}">{{$command}}</pre>{{copyButton (printf "dataset-restore-%d" $i)}}</div></li>
+          {{end}}
+        </ol>
+      {{else}}
+        <p>Run this command on the restore host.</p>
+        {{range $i, $command := .RestoreCommands}}
+          <div class="command-block"><pre id="dataset-restore-{{$i}}">{{$command}}</pre>{{copyButton (printf "dataset-restore-%d" $i)}}</div>
+        {{end}}
+      {{end}}
+    {{else}}
+      <p>No chain-valid restore point is available yet. Validate the dataset after its first upload.</p>
+    {{end}}
+  </section>
+  <section>
+    <h2>Validation</h2>
+    <p>Validate every committed snapshot in this dataset.</p>
+    <form method="post" action="/datasets/{{.Dataset.DatasetID}}/validate"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Validate dataset</button></form>
+  </section>
+  <section>
+    <h2>Snapshots</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Status</th><th>Stream validation</th><th>Chain validation</th><th>Stored</th><th>Chunks</th><th>Completed</th><th>Failure</th></tr></thead>
+      <tbody>
+        {{range .Snapshots}}
+          <tr><td><a href="/snapshots/{{.ID}}">{{.Name}}</a></td><td><span class="badge {{badge .Status}}">{{.Status}}</span></td><td><span class="badge {{badge .StreamValidationStatus}}">{{.StreamValidationStatus}}</span></td><td><span class="badge {{badge .ChainValidationStatus}}">{{.ChainValidationStatus}}</span></td><td>{{bytes .StoredBytes}}</td><td>{{.ChunkCount}}</td><td>{{nullString .UploadCompletedAt}}</td><td>{{nullString .FailureReason}}</td></tr>
+        {{else}}
+          <tr><td colspan="8">No snapshots yet.</td></tr>
+        {{end}}
+      </tbody>
+    </table>
+  </section>
+  <section class="danger-zone">
+    <h2>Danger zone</h2>
+    <form method="post" action="/datasets/{{.Dataset.DatasetID}}/delete" onsubmit="return confirm('Delete this dataset, catalog rows, manifests, and chunks?')"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Delete dataset</button></form>
+  </section>
+</main>
+<script>{{pageJS}}</script>
+</body></html>

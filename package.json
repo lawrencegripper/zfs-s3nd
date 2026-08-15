@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.2.22",
+  "devDependencies": {
+    "@playwright/test": "^1.54.0",
+    "railway": "^3.4.1"
+  },
+  "scripts": {
+    "railway:plan": "railway config plan --verbose --decrypt-variables",
+    "railway:apply": "railway config apply --yes",
+    "ui:test": "playwright test",
+    "ui:test:headed": "playwright test --headed",
+    "ui:test:install": "playwright install chromium",
+    "ui:test:install-ci": "playwright install --with-deps chromium"
+  }
+}

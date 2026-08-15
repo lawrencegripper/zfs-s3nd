@@ -1,0 +1,12 @@
+FROM golang:1.26-bookworm
+
+RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+      sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/g' /etc/apt/sources.list.d/debian.sources; \
+    fi \
+  && apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      ca-certificates curl make openssh-client procps python3 sqlite3 zfs-fuse \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+CMD ["./scripts/test-zfs-ssh-roundtrip.sh"]

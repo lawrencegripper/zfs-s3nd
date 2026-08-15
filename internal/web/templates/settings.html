@@ -1,0 +1,100 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Settings - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+{{nav .CSRFToken}}
+<main>
+  <h1>Access and integrations</h1>
+  <p class="lede">Manage the credentials allowed to send backups or call the administration API.</p>
+  {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+
+  {{if .HasRuntimeSettings}}
+  <section>
+    <h2>Backup policy</h2>
+    <p>Environment variables override values saved here. Database changes apply to new uploads immediately.</p>
+    <div class="cards two-col">
+      {{$upload := .RuntimeSettings.UploadThroughputLimit}}
+      <div class="card">
+        <h3>Upload throughput limit <span class="badge badge-yellow">{{$upload.Source}}</span></h3>
+        <p>Effective value: <strong>{{$upload.Value}} Mbps</strong>. Use <code>0</code> to disable throttling.</p>
+        {{if $upload.EnvironmentControlled}}
+          <p class="subtle">Controlled by <code>{{$upload.EnvironmentVariable}}</code>. Remove that environment variable to edit this setting here.</p>
+        {{end}}
+        <form method="post" action="/settings/runtime/{{$upload.Key}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <p><label>Limit in decimal Mbps<br><input type="number" name="value" min="0" step="0.1" value="{{$upload.Value}}" required {{if $upload.EnvironmentControlled}}disabled{{end}}></label></p>
+          <button type="submit" {{if $upload.EnvironmentControlled}}disabled{{end}}>Save limit</button>
+        </form>
+        {{if eq $upload.Source "Database"}}
+        <form class="inline-actions" method="post" action="/settings/runtime/{{$upload.Key}}/reset"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Reset to default ({{$upload.DefaultValue}} Mbps)</button></form>
+        {{end}}
+      </div>
+
+      {{$chain := .RuntimeSettings.MaxIncrementalChainDepth}}
+      <div class="card">
+        <h3>Maximum incremental chain depth <span class="badge badge-yellow">{{$chain.Source}}</span></h3>
+        <p>Effective value: <strong>{{$chain.Value}}</strong>. Use <code>0</code> for no limit.</p>
+        {{if $chain.EnvironmentControlled}}
+          <p class="subtle">Controlled by <code>{{$chain.EnvironmentVariable}}</code>. Remove that environment variable to edit this setting here.</p>
+        {{end}}
+        <form method="post" action="/settings/runtime/{{$chain.Key}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <p><label>Snapshots in a chain<br><input type="number" name="value" min="0" step="1" value="{{$chain.Value}}" required {{if $chain.EnvironmentControlled}}disabled{{end}}></label></p>
+          <button type="submit" {{if $chain.EnvironmentControlled}}disabled{{end}}>Save depth</button>
+        </form>
+        {{if eq $chain.Source "Database"}}
+        <form class="inline-actions" method="post" action="/settings/runtime/{{$chain.Key}}/reset"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Reset to default ({{$chain.DefaultValue}})</button></form>
+        {{end}}
+      </div>
+    </div>
+  </section>
+  {{end}}
+
+  <section>
+    <h2>SSH public keys</h2>
+    <p><strong>Public keys only.</strong> Keep private keys on their source systems. The SSH username becomes the source name in the catalog; use a stable name such as <code>nas-home</code>.</p>
+    <div class="cards two-col">
+      <div class="card">
+        <h3>Import from GitHub</h3>
+        <form method="post" action="/settings/ssh-keys/github"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <p><label>GitHub username<br><input name="github_username" placeholder="octocat" required></label></p>
+          <button type="submit">Import public keys</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Generate a dedicated key</h3>
+        <pre>{{.NASKeygenScript}}</pre>
+      </div>
+    </div>
+    <h3>Add a public key manually</h3>
+    <form method="post" action="/settings/ssh-keys"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+      <p><label>Key name<br><input name="name" placeholder="truenas zfs-s3nd" required></label></p>
+      <p><label>Public key<br><textarea name="public_key" rows="3" required placeholder="ssh-ed25519 AAAA..."></textarea></label></p>
+      <button type="submit">Add public key</button>
+    </form>
+    <table>
+      <thead><tr><th>Name</th><th>Fingerprint</th><th>Last used</th><th>Action</th></tr></thead>
+      <tbody>
+        {{range .SSHKeys}}
+          <tr><td>{{.Name}}</td><td><code>{{.FingerprintSha256}}</code></td><td>{{nullString .LastUsedAt}}</td><td><form method="post" action="/settings/ssh-keys/{{.ID}}/delete" onsubmit="return confirm('Delete this SSH key?')"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Delete</button></form></td></tr>
+        {{else}}<tr><td colspan="4">No SSH keys configured.</td></tr>{{end}}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>API tokens</h2>
+    <p>API tokens grant administrator access. Create one per integration so it can be revoked independently.</p>
+    <form method="post" action="/settings/api-tokens"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+      <p><label>Name<br><input name="name" required></label></p>
+      <button type="submit">Create API token</button>
+    </form>
+    <table>
+      <thead><tr><th>Name</th><th>Prefix</th><th>Created</th><th>Last used</th><th>Revoked</th><th>Action</th></tr></thead>
+      <tbody>
+        {{range .APITokens}}
+          <tr><td>{{.Name}}</td><td><code>{{.TokenPrefix}}</code></td><td>{{.CreatedAt}}</td><td>{{nullString .LastUsedAt}}</td><td>{{nullString .RevokedAt}}</td><td>{{if not .RevokedAt.Valid}}<form method="post" action="/settings/api-tokens/{{.ID}}/delete" onsubmit="return confirm('Revoke this API token?')"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Revoke</button></form>{{end}}</td></tr>
+        {{else}}<tr><td colspan="6">No API tokens configured.</td></tr>{{end}}
+      </tbody>
+    </table>
+  </section>
+</main>
+</body></html>

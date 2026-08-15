@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Datasets - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+{{nav .CSRFToken}}
+<main class="datasets-main">
+  <h1>Datasets</h1>
+  <p class="lede">Backup coverage, validation health, and latest upload status.</p>
+  {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+
+  {{if .Datasets}}
+  <table class="dataset-table">
+    <colgroup>
+      <col class="dataset-col-name"><col class="dataset-col-health"><col class="dataset-col-count"><col class="dataset-col-latest"><col class="dataset-col-stored"><col class="dataset-col-upload"><col class="dataset-col-actions">
+    </colgroup>
+    <thead><tr><th>Dataset</th><th>Validation</th><th>Snapshots</th><th>Latest snapshot</th><th>Stored</th><th>Last upload</th><th>Actions</th></tr></thead>
+    <tbody>
+      {{range .Datasets}}
+      <tr class="dataset-row dataset-row-standalone">
+        <td data-label="Dataset"><strong><a href="/datasets/{{.DatasetID}}">{{.DatasetPath}}</a></strong><br><span class="subtle">{{.SourceName}} / {{.PoolName}}</span></td>
+        <td data-label="Validation">
+          {{if .FailedValidationCount}}<span class="badge badge-red">{{.FailedValidationCount}} failed</span>{{else}}<span class="badge badge-green">No failures</span>{{end}}
+          <div class="cell-detail">Latest chain-valid: {{if .LatestChainValidSnapshotName}}{{.LatestChainValidSnapshotName}}{{else}}Not validated{{end}}</div>
+        </td>
+        <td data-label="Snapshots">{{.SnapshotCount}}</td>
+        <td data-label="Latest snapshot">{{if .LatestSnapshotName}}{{.LatestSnapshotName}}{{else}}—{{end}}</td>
+        <td data-label="Stored">{{bytesAny .StoredBytes}}</td>
+        <td data-label="Last upload">{{if .LatestUploadAt}}{{time .LatestUploadAt}}{{else}}—{{end}}</td>
+        <td data-label="Actions">
+          <div class="row-actions">
+            <a class="button-link" href="/datasets/{{.DatasetID}}">View</a>
+            <form method="post" action="/datasets/{{.DatasetID}}/validate"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button type="submit">Validate</button></form>
+          </div>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <section class="empty-state">
+    <h2>No datasets yet</h2>
+    <p>Send the first ZFS snapshot from an authorized source. Setup instructions are available on the <a href="/">Dashboard</a>.</p>
+  </section>
+  {{end}}
+</main>
+</body></html>

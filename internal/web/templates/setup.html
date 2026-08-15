@@ -1,0 +1,18 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Initial setup - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+<main class="auth-main">
+  <section class="auth-card" aria-labelledby="page-title">
+    <p class="eyebrow">ZFS S3nd</p>
+    <h1 id="page-title">Secure this backup target</h1>
+    <p class="lede">Set the single administrator password for this service. You will use it to review backups and manage access.</p>
+    <p>Next, you will authorize an SSH public key and send your first ZFS snapshot.</p>
+    {{if .Error}}<p class="error" role="alert">{{.Error}}</p>{{end}}
+    <form method="post" action="/setup">
+      <p><label>Admin password<br><input type="password" name="password" minlength="12" autocomplete="new-password" aria-describedby="password-help" required autofocus></label><br><small id="password-help">Use at least 12 characters.</small></p>
+      <p><label>Confirm admin password<br><input type="password" name="confirm_password" minlength="12" autocomplete="new-password" required></label></p>
+      <button type="submit">Save password and continue</button>
+    </form>
+  </section>
+</main>
+</body></html>

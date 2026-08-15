@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>API token created - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+<main class="auth-main">
+  <section class="auth-card">
+    <p><a href="/settings">Settings</a></p>
+    <h1>API token created</h1>
+    <p>Copy it now. It will not be shown again.</p>
+    <dl>
+      <dt>Name</dt><dd>{{.Name}}</dd>
+      <dt>Prefix</dt><dd><code>{{.Prefix}}</code></dd>
+      <dt>Token</dt><dd><textarea rows="3" readonly>{{.Token}}</textarea></dd>
+    </dl>
+  </section>
+</main>
+</body></html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - ZFS S3nd</title>
+  <style>{{pageCSS}}</style>
+</head>
+<body>
+  {{nav .CSRFToken}}
+  <main>
+    <h1>Dashboard</h1>
+    {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+    {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+
+    {{if eq .SnapshotCount 0}}
+    <section class="card callout" aria-labelledby="getting-started-title">
+      <h2 id="getting-started-title">Back up your first dataset</h2>
+      <h3>1. Authorize an SSH key</h3>
+      {{if not .SSHKeys}}
+        <p>Authorize a public key from the system that will send backups. Keep the private key on the source system; never paste it here.</p>
+        <form class="inline-actions" method="post" action="/settings/ssh-keys/github"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <input name="github_username" placeholder="GitHub username" aria-label="GitHub username" autocomplete="username" required>
+          <button type="submit">Import public keys from GitHub</button>
+        </form>
+        <p><a href="/settings">Or generate and add a dedicated SSH key</a>.</p>
+      {{else}}
+        <p><span class="badge badge-green">Ready</span> An SSH public key is authorized.</p>
+      {{end}}
+      <h3>2. Send a snapshot</h3>
+      <p>Run these commands on the source system. Replace <code>tank/photos</code> with your dataset and <code>[named_source]</code> with a stable source name such as <code>nas-home</code>.</p>
+      <div class="command-block"><pre id="first-upload-command">{{.FirstUploadScript}}</pre>{{copyButton "first-upload-command"}}</div>
+      <p>The dataset will appear on this dashboard after the SSH command completes successfully.</p>
+    </section>
+    {{end}}
+
+    <section>
+      <h2>Problems</h2>
+      <div class="cards">
+        <div class="card"><strong>Failed uploads</strong><br><span class="badge {{badgeAny .FailedUploads}}">{{.FailedUploads}}</span></div>
+        <div class="card"><strong>Failed chain validations</strong><br><span class="badge {{badgeAny .FailedValidations}}">{{.FailedValidations}}</span></div>
+        <div class="card"><strong>Catalog backup</strong><br>{{if .LatestBackup}}<span class="badge {{badge .LatestBackup.Status}}">{{.LatestBackup.Status}}</span><br><small>{{nullString .LatestBackup.CompletedAt}}</small>{{else}}<span class="badge badge-yellow">missing</span>{{end}}</div>
+      </div>
+      {{if or .FailedUploads .FailedValidations}}
+        <p><a href="/activity">View failures in Activity.</a></p>
+      {{else}}
+        <p class="subtle">No upload or chain validation failures.</p>
+      {{end}}
+    </section>
+
+    <section>
+      <h2>Current activity</h2>
+      <table>
+        <thead><tr><th>Target</th><th>Status</th><th>Received</th><th>Chunks</th><th>Throughput</th><th>Last heartbeat</th></tr></thead>
+        <tbody>
+          {{range .ActiveUploads}}
+            <tr><td>{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.TargetSnapshotName}}</td><td><span class="badge {{badge .Status}}">{{.Status}}</span></td><td>{{bytes .BytesReceived}}</td><td>{{.ChunksCompleted}}</td><td>{{.Throughput}}</td><td>{{.LastHeartbeatAt}}</td></tr>
+          {{else}}
+            <tr><td colspan="6">No active uploads.</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Backups</h2>
+      <div class="cards">
+        <div class="card"><strong>Devices</strong><br>{{.SourceCount}}</div>
+        <div class="card"><strong>Datasets</strong><br>{{.DatasetCount}}</div>
+        <div class="card"><strong>Committed snapshots</strong><br>{{.SnapshotCount}}</div>
+        <div class="card"><strong>Stored bytes</strong><br>{{bytes .StoredBytes}}</div>
+      </div>
+      <table>
+        <thead><tr><th>Device</th><th>Pool</th><th>Dataset</th><th>Snapshots</th><th>Latest</th><th>Latest valid</th><th>Stored</th></tr></thead>
+        <tbody>
+          {{range .Datasets}}
+            <tr><td>{{.SourceName}}</td><td>{{.PoolName}}</td><td><a href="/datasets/{{.DatasetID}}">{{.DatasetPath}}</a></td><td>{{.SnapshotCount}}</td><td>{{.LatestSnapshotName}}</td><td>{{.LatestChainValidSnapshotName}}</td><td>{{bytesAny .StoredBytes}}</td></tr>
+          {{else}}
+            <tr><td colspan="7">No datasets yet.</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+      <h3>Push a new dataset</h3>
+      <p>Replace <code>tank/photos</code>, then run this on the NAS.</p>
+      <div class="command-block"><textarea id="new-dataset-command" rows="3" readonly>{{.FirstUploadScript}}</textarea>{{copyButton "new-dataset-command"}}</div>
+      <p><a href="/datasets">All datasets</a></p>
+    </section>
+  </main>
+  <script>{{pageJS}}</script>
+</body>
+</html>

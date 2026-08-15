@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Snapshot - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+{{nav .CSRFToken}}
+<main>
+  <p><a href="/datasets/{{.Snapshot.DatasetID}}">Dataset</a></p>
+  <h1>{{.Snapshot.SourceName}} / {{.Snapshot.PoolName}} / {{.Snapshot.DatasetPath}} @ {{.Snapshot.SnapshotName}}</h1>
+  {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+
+  <section class="headline-status">
+    <h2>Restore chain</h2>
+    <p><span class="badge {{badge .Snapshot.ChainValidationStatus}}">{{.Snapshot.ChainValidationStatus}}</span></p>
+  </section>
+
+  <section>
+    <h2>Validation</h2>
+    <form class="inline-actions" method="post" action="/snapshots/{{.Snapshot.SnapshotID}}/validate"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="mode" value="stream"><button type="submit">Validate stream now</button></form>
+    <form class="inline-actions" method="post" action="/snapshots/{{.Snapshot.SnapshotID}}/validate"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="mode" value="chain"><button type="submit">Validate full chain now</button></form>
+  </section>
+
+  <section>
+    <h2>Snapshot details</h2>
+    <dl>
+      <dt>Status</dt><dd><span class="badge {{badge .Snapshot.Status}}">{{.Snapshot.Status}}</span></dd>
+      <dt>Stream validation</dt><dd><span class="badge {{badge .Snapshot.StreamValidationStatus}}">{{.Snapshot.StreamValidationStatus}}</span></dd>
+      <dt>Manifest</dt><dd><code>{{nullString .Snapshot.ManifestObjectKey}}</code></dd>
+      <dt>Logical bytes</dt><dd>{{nullBytes .Snapshot.LogicalBytes}}</dd>
+      <dt>Stored bytes</dt><dd>{{bytes .Snapshot.StoredBytes}}</dd>
+      <dt>Chunks</dt><dd>{{.Snapshot.ChunkCount}}</dd>
+      <dt>SHA256</dt><dd><code>{{nullString .Snapshot.StreamSha256}}</code></dd>
+    </dl>
+  </section>
+
+  <section>
+    {{if .RestoreCommands}}
+      <h2>Restore {{if gt (len .RestoreCommands) 1}}commands{{else}}command{{end}}</h2>
+      {{if gt (len .RestoreCommands) 1}}
+        <p>Run these commands in order: parent snapshot first, then each incremental.</p>
+        <ol class="restore-steps">
+          {{range $i, $cmd := .RestoreCommands}}
+            <li><p>Step {{add $i 1}}</p><div class="command-block"><pre id="restore-command-{{$i}}">{{$cmd}}</pre>{{copyButton (printf "restore-command-%d" $i)}}</div></li>
+          {{end}}
+        </ol>
+      {{else}}
+        {{range $i, $cmd := .RestoreCommands}}
+          <p>Run this command on the restore host.</p>
+          <div class="command-block"><pre id="restore-command-{{$i}}">{{$cmd}}</pre>{{copyButton (printf "restore-command-%d" $i)}}</div>
+        {{end}}
+      {{end}}
+    {{else}}
+      <h2>Restore commands</h2>
+      <p>No restore command yet. The chain needs committed manifests.</p>
+    {{end}}
+  </section>
+
+  <section class="danger-zone">
+    <h2>Danger zone</h2>
+    <form method="post" action="/snapshots/{{.Snapshot.SnapshotID}}/delete" onsubmit="return confirm('Delete this snapshot, manifest, and chunks?')"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button type="submit">Delete snapshot</button></form>
+  </section>
+</main>
+<script>{{pageJS}}</script>
+</body></html>

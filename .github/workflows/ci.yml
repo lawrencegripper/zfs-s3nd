@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Go tests and integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+
+      - name: Cache local Go/tool state
+        uses: actions/cache@v4
+        with:
+          path: |
+            .gocache
+            .gomodcache
+            .bin
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum', 'sqlc.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Unit tests
+        run: make test
+
+      - name: Browser UI tests
+        run: make ui-test-ci
+
+      - name: S3 integration tests
+        run: make integration
+
+      - name: Docker image builds
+        run: make docker-build

@@ -1,0 +1,11 @@
+.git
+.gocache
+.gomodcache
+.docker-config
+.bin
+data
+*.db
+*.db-shm
+*.db-wal
+README.md
+docs

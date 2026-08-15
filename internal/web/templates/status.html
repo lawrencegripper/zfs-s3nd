@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Status - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+{{nav .CSRFToken}}
+<main>
+  <h1>Status</h1>
+  {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+
+  {{if .Ready}}
+    <section class="callout">
+      <h2><span class="badge badge-green">Ready</span></h2>
+    </section>
+  {{else}}
+    <section class="danger-zone">
+      <h2><span class="badge badge-red">Fix this</span> {{.ErrorCount}} failing</h2>
+    </section>
+  {{end}}
+
+  <section>
+    <h2>Checks</h2>
+    <ul class="checklist">
+      {{range .Checks}}
+        <li class="check-item {{if not .OK}}check-fail{{end}}">
+          <strong>{{.Name}}</strong>
+          <span class="badge {{if .OK}}badge-green{{else}}badge-red{{end}}">{{if .OK}}ok{{else}}failed{{end}}</span>
+          <span>{{if .OK}}{{.Description}}{{else}}{{.Detail}}{{end}}</span>
+        </li>
+      {{end}}
+    </ul>
+  </section>
+</main>
+</body></html>

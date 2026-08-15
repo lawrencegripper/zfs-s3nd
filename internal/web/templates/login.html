@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Admin sign in - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+<main class="auth-main">
+  <section class="auth-card" aria-labelledby="page-title">
+    <p class="eyebrow">ZFS S3nd</p>
+    <h1 id="page-title">Admin sign in</h1>
+    {{if .Error}}<p class="error" role="alert">{{.Error}}</p>{{end}}
+    <form method="post" action="/login">
+      <p><label>Admin password<br><input type="password" name="password" autocomplete="current-password" required autofocus></label></p>
+      <p><label class="check-label"><input type="checkbox" name="remember" value="1"> Keep me signed in on this device</label></p>
+      <button type="submit">Sign in</button>
+    </form>
+  </section>
+</main>
+</body></html>

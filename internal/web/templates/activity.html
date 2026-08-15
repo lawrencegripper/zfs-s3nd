@@ -1,0 +1,70 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Activity - ZFS S3nd</title><style>{{pageCSS}}</style></head>
+<body>
+{{nav .CSRFToken}}
+<main class="activity-main">
+  <h1>Activity</h1>
+  {{if .Message}}<p class="message">{{.Message}}</p>{{end}}
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+
+  <section>
+    <h2>Active uploads</h2>
+    {{if .ActiveUploads}}
+      <div class="table-scroll">
+        <table class="activity-table">
+          <thead><tr><th class="target">Target</th><th class="nowrap">Status</th><th class="nowrap">Received</th><th class="nowrap">Chunks</th><th class="nowrap">Throughput</th><th class="nowrap">Started</th><th class="nowrap">Last heartbeat</th></tr></thead>
+          <tbody>
+            {{range .ActiveUploads}}
+              <tr><td class="wrap target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.TargetSnapshotName}}</td><td class="nowrap"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap">{{bytes .BytesReceived}}</td><td class="nowrap">{{.ChunksCompleted}}</td><td class="nowrap">{{.Throughput}}</td><td class="nowrap">{{time .StartedAt}}</td><td class="nowrap">{{time .LastHeartbeatAt}}</td></tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <p class="activity-empty">No active uploads.</p>
+    {{end}}
+  </section>
+
+  <section>
+    <h2>Validation jobs</h2>
+    <div class="table-scroll">
+      <table class="activity-table">
+        <thead><tr><th class="nowrap">Status</th><th class="nowrap">Type</th><th class="target">Target</th><th class="nowrap">Executor</th><th class="nowrap">Started</th><th class="nowrap">Completed</th><th class="wrap">Result</th></tr></thead>
+        <tbody>
+          {{range .ValidationJobs}}
+            <tr><td class="nowrap"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap">{{label .Type}}</td><td class="wrap target">{{.SourceName}} / {{.PoolName}} / {{.DatasetPath}} @ {{.SnapshotName}}</td><td class="nowrap">{{.Executor}}</td><td class="nowrap">{{time .StartedAt}}</td><td class="nowrap">{{time .CompletedAt}}</td><td class="wrap">{{nullString .ResultSummary}}</td></tr>
+          {{else}}<tr><td colspan="7">No validation jobs yet.</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Operations</h2>
+    <div class="table-scroll">
+      <table class="activity-table">
+        <thead><tr><th class="nowrap">Type</th><th class="nowrap">Status</th><th class="nowrap">Started</th><th class="nowrap">Updated</th><th class="nowrap">Completed</th><th class="wrap">Summary</th><th class="wrap">Failure</th></tr></thead>
+        <tbody>
+          {{range .Operations}}
+            <tr><td class="nowrap">{{label .Type}}</td><td class="nowrap"><span class="badge {{badge .Status}}">{{label .Status}}</span></td><td class="nowrap">{{time .StartedAt}}</td><td class="nowrap">{{time .UpdatedAt}}</td><td class="nowrap">{{time .CompletedAt}}</td><td class="wrap">{{nullString .Summary}}</td><td class="wrap">{{nullString .FailureReason}}</td></tr>
+          {{else}}<tr><td colspan="7">No operations yet.</td></tr>{{end}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Catalog backup</h2>
+    {{if .LatestBackup}}
+      <dl>
+        <dt>Status</dt><dd><span class="badge {{badge .LatestBackup.Status}}">{{label .LatestBackup.Status}}</span></dd>
+        <dt>Completed</dt><dd>{{time .LatestBackup.CompletedAt}}</dd>
+        <dt>Object key</dt><dd><code>{{.LatestBackup.ObjectKey}}</code></dd>
+        <dt>Size</dt><dd>{{bytes .LatestBackup.SizeBytes}}</dd>
+      </dl>
+    {{else}}
+      <p><span class="badge badge-yellow">missing</span> No catalog backup yet.</p>
+    {{end}}
+  </section>
+</main>
+</body></html>
