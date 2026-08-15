@@ -69,6 +69,14 @@ test.describe.serial("single-admin journey", () => {
     const navigation = page.getByRole("navigation", { name: "Primary" });
     for (const name of ["Dashboard", "Datasets", "Activity", "Status", "Settings"]) {
       await expect(navigation.getByRole("link", { name })).toBeVisible();
+      await navigation.getByRole("link", { name, exact: true }).click();
+      const widths = await page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        main: document.querySelector("main")?.getBoundingClientRect().width ?? 0,
+        toolbar: document.querySelector(".topbar-inner")?.getBoundingClientRect().width ?? 0,
+      }));
+      expect(widths.main, `${name} should use the viewport width`).toBe(widths.viewport);
+      expect(widths.toolbar, `${name} toolbar should match the page width`).toBe(widths.viewport);
     }
 
     await navigation.getByRole("link", { name: "Settings" }).click();
