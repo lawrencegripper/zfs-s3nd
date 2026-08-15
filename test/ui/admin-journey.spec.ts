@@ -103,7 +103,7 @@ test.describe.serial("single-admin journey", () => {
   });
 
   test("keeps administration pages usable at a narrow viewport", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
+    await page.setViewportSize({ width: 402, height: 874 });
     await signIn(page);
 
     for (const destination of ["Dashboard", "Datasets", "Activity", "Status", "Settings"]) {

@@ -67,6 +67,8 @@ pre { padding: 1rem; overflow-x: auto; }
   .topbar .logout { margin-left: 0; }
   .two-col { grid-template-columns: 1fr; }
   .command-block pre { padding-top: 3.25rem; padding-right: 1rem; }
+  .check-item { grid-template-columns: minmax(0, 1fr) auto; }
+  .check-item > :last-child { grid-column: 1 / -1; }
 }
 @media (max-width: 64rem) {
   .dataset-table, .dataset-table tbody { display: block; width: 100%; }
