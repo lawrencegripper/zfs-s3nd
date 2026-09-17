@@ -52,6 +52,14 @@ make zfs-roundtrip-docker # privileged zfs-fuse container
 
 Both create temporary file-backed pools, send full and incremental snapshots through the service, restore them, and compare file contents.
 
+## Scheduled TrueNAS restore checks
+
+The weekday restore job lives in the homenet repository at
+`truenas/zfs-s3nd-validation/`. It discovers datasets from this service's API,
+restores them to PoolD, and checks that filesystems mount and every regular file
+can be read after normal crash recovery. Live-snapshot inconsistencies can be
+reported as warnings when the data remains accessible.
+
 ## Manual validation commands
 
 ```bash
